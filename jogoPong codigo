@@ -1,0 +1,138 @@
+// Variáveis da bolinha
+let xBolinha = 100;
+let yBolinha = 200;
+let diametro = 22;
+let raio = diametro / 2;
+
+// Velocidade da bolinha
+let velocidadeXBolinha = 6;
+let velocidadeYBolinha = 6;
+
+// Variáveis da raquete
+let xRaquete = 5;
+let yRaquete = 150;
+let raqueteComprimento = 10;
+let raqueteAltura = 90;
+
+// Variáveis da raquete oponente
+let xRaqueteOponente = 585;
+let yRaqueteOponente = 150;
+let velocidadeRaqueteOponente = 5;
+
+// Variáveis do placar
+let meusPontos = 0;
+let pontosOponente = 0;
+
+function setup() {
+  createCanvas(600, 400);
+}
+
+function draw() {
+  background(0);
+  mostraBolinha();
+  movimentaBolinha();
+  verificaColisaoBorda();
+  mostraRaquete(xRaquete, yRaquete);
+  movimentaMinhaRaquete();
+  colisaoRaquete(xRaquete, yRaquete);
+  mostraRaquete(xRaqueteOponente, yRaqueteOponente);
+  movimentaRaqueteOponente();
+  colisaoRaquete(xRaqueteOponente, yRaqueteOponente);
+  incluiPlacar();
+  verificaPonto(); // Verificar o ponto após a verificação de colisão
+}
+
+function mostraBolinha() {
+  fill(255); // Define a cor da bolinha como branca
+  noStroke(); // Remove o contorno da bolinha
+  circle(xBolinha, yBolinha, diametro);
+}
+
+function movimentaBolinha() {
+  xBolinha += velocidadeXBolinha;
+  yBolinha += velocidadeYBolinha;
+}
+
+function verificaColisaoBorda() {
+  if (yBolinha + raio > height || yBolinha - raio < 0) {
+    velocidadeYBolinha *= -1;
+  }
+}
+
+function mostraRaquete(x, y) {
+  fill(255); // Define a cor da raquete como branca
+  noStroke(); // Remove o contorno da raquete
+  rect(x, y, raqueteComprimento, raqueteAltura);
+}
+
+function movimentaMinhaRaquete() {
+  if (keyIsDown(UP_ARROW)) {
+    yRaquete -= 10; // Move a raquete para cima
+  }
+  if (keyIsDown(DOWN_ARROW)) {
+    yRaquete += 10; // Move a raquete para baixo
+  }
+
+  // Impede que a raquete saia da tela
+  yRaquete = constrain(yRaquete, 0, height - raqueteAltura);
+}
+
+function colisaoRaquete(x, y) {
+  // Verifica colisão da bolinha com a raquete
+  let colidiu = 
+    xBolinha + raio > x &&  // Verifica o lado direito da bolinha
+    xBolinha - raio < x + raqueteComprimento &&  // Verifica o lado esquerdo da bolinha
+    yBolinha + raio > y &&  // Verifica a parte inferior da bolinha
+    yBolinha - raio < y + raqueteAltura;  // Verifica a parte superior da bolinha
+
+  if (colidiu) {
+    velocidadeXBolinha *= -1; // Inverte a direção da bolinha se houver colisão
+    
+    // Corrige a posição da bolinha para evitar que "grude" na raquete
+    if (xBolinha < width / 2) {
+      xBolinha = x + raqueteComprimento + raio; // lado esquerdo
+    } else {
+      xBolinha = x - raio; // lado direito
+    }
+  }
+}
+
+function movimentaRaqueteOponente() {
+  // Uma simples IA para movimentar a raquete oponente
+  if (yBolinha > yRaqueteOponente + raqueteAltura / 2) {
+    yRaqueteOponente += velocidadeRaqueteOponente;
+  } else {
+    yRaqueteOponente -= velocidadeRaqueteOponente;
+  }
+  
+  // Impede que a raquete oponente saia da tela
+  yRaqueteOponente = constrain(yRaqueteOponente, 0, height - raqueteAltura);
+}
+
+// Função para incluir o placar
+function incluiPlacar() {
+  textAlign(CENTER);
+  textSize(16);
+  fill(255); // Define a cor do texto como branca
+  text(meusPontos, 278, 26);
+  text(pontosOponente, 321, 26);
+}
+
+// Função para verificar se alguém marcou ponto
+function verificaPonto() {
+  if (xBolinha + raio > width) {
+    meusPontos += 1;
+    reiniciaBolinha();
+  }
+  if (xBolinha - raio < 0) {
+    pontosOponente += 1;
+    reiniciaBolinha();
+  }
+}
+
+// Função para reiniciar a posição da bolinha após um ponto
+function reiniciaBolinha() {
+  xBolinha = width / 2;
+  yBolinha = height / 2;
+  velocidadeXBolinha *= -1;
+}
